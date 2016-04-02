@@ -1,0 +1,160 @@
+"============================================================
+"============================================================
+" Below goes customization
+"============================================================
+"============================================================
+
+colorscheme zenburn
+
+Plugin 'Buffergator'
+Plugin 'taglist.vim'
+Plugin 'mattn/emmet-vim'
+"Plugin 'mileszs/ack.vim'
+
+"============================================================
+" Vertical line to see lenght of line  
+"============================================================
+let &colorcolumn=join(range(81,999),",")
+let &colorcolumn="80,".join(range(400,999),",")
+
+"============================================================
+" Show long lines <Leader> + l   
+"============================================================
+
+autocmd BufEnter * highlight OverLength ctermbg=red guibg=#592929 
+autocmd BufEnter * match OverLength /\%81v.*/
+autocmd BufEnter * let w:long_line_match = 1
+
+fu! LongLineHighlightToggle()
+    highlight OverLength ctermbg=red guibg=#592929 
+    if exists('w:long_line_match') 
+        match OverLength //
+        unlet w:long_line_match
+    else 
+        match OverLength /\%81v.*/
+        let w:long_line_match = 1
+    endif
+endfunction
+map <Leader>l :call LongLineHighlightToggle()<CR>
+
+"============================================================
+" Search in current directory 
+"============================================================
+
+"Search in current file only
+command! -nargs=+ CurrentFileSearch execute 'vimgrep '.expand('<cword>').' '.expand('%') | :copen | :cc
+:nmap <leader>r :CurrentFileSearch  <c-r>=expand("<cword>")<cr><cr>
+
+" Search in all files in curent directory in files with same extention [not tested]
+:nmap <leader>g :Grep    <c-r>=expand("<cword>")<cr><cr>
+command! -nargs=+ Grep     execute 'silent grep! -I -r -n --exclude *.* . -e <args>'.expand('%') | copen | execute 'silent /<args>'
+
+" Search in all files in curent directory
+command! -nargs=+ AllGrep  execute 'silent grep! -I -r -n --exclude *.* . -e <args>' | copen | execute 'silent /<args>'
+:nmap <leader>G :AllGrep <c-r>=expand("<cword>")<cr><cr>
+
+"OR same result
+
+":nmap <leader>e :execute "vimgrep /" . expand("<cword>") . "/gj **/*.*" . expand("") <Bar> cw<CR>
+nmap <leader>e :execute "vimgrep /" . expand("<cword>") . "/gj **/*.*" <Bar> cw<CR>
+
+nmap <leader>E :execute "vimgrep /" . expand("<cword>") . "/gj **/*.*" . expand("") <Bar> cw<CR>
+
+" opens search results in a window w/ links and highlight the matches
+
+" Search by extention [in this example by json,pyc]
+command! -nargs=+ Grep        execute 'silent grep! -I -r -n --exclude *.{json,pyc} . -e <args>' | copen | execute 'silent /<args>'
+command! -nargs=+ GrepExclude execute 'silent grep! -I -r -n --exclude *.{json,pyc} . -e <args>' | copen | execute 'silent /<args>'
+
+
+"SARCH PHRASE from command line:
+":vimgrep /your phrase/ %
+
+nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+"command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
+
+"============================================================
+" Window resizing mappings 
+"============================================================
+
+map <S-Up>    <c-w>+
+map <S-Down>  <c-w>-
+map <S-Right> <c-w>>
+map <S-Left>  <c-w><
+
+"============================================================
+" Print values in [] [insert mode]   
+"============================================================
+
+inoreabbrev <expr> nu "[" . line('.'). "]"
+inoreabbrev <expr> date  "[" . strftime('%c') .  "]"
+inoreabbrev <expr> fname "[" . expand('%:t') .   "]"
+inoreabbrev <expr> fpath "[" . expand('%:p') .   "]"
+inoreabbrev <expr> fdir  "[" . expand('%:p:h') . "]"
+
+"============================================================
+" Insert template for pelican header 
+"============================================================
+
+function! HgetNewPost2()
+    let  pelican_post_template = "".
+                \"Title: YOURTITLE\n".
+                \"Date: "    . strftime('%c') . "\n".
+                \"Modified: ". strftime('%c') . "\n".
+                \"Category: CATEGORY \n".
+                \"Tags: TAG \n".
+                \"Slug: my-super-post\n".
+                \"Authors: MIB Engineer\n".
+                \"Summary: SUMMARY\n"
+    return pelican_post_template
+endfunction
+
+inoreabbrev <expr> pnew  HgetNewPost2()
+
+"============================================================
+" Compile java 
+"============================================================
+autocmd Filetype java set makeprg=javac\ %
+set errorformat=%A%f:%l:\ %m,%-Z%p^,%-C%.%#
+map <F5> :make<Return>
+map <F6> :cprevious<Return>
+map <F7> :cnext<Return>
+
+"============================================================
+" Run python script on F2
+"============================================================
+nnoremap <F2> :! python %<CR>
+
+
+"============================================================
+"============================================================
+" Experiments   
+"============================================================
+
+"map <F2> :execute "vimgrep /" . expand("<cword>") . "/gj **/*.*" .  expand("%:e") <Bar> cw<CR>
+"map <F4> :echo 'Current time is ' . strftime('%c')<CR>
+"map! <F3> a<C-R>=strftime('%c')<CR><Esc>
+"map! <F3> <C-R>=line('.')<CR><Esc>
+
+"nnoremap <leader>g :silent execute "grep! -R " . shellescape(expand("<cWORD>")) . " ."<cr>:copen<cr>
+":nmap <leader>e :execute "vimgrep /" . expand("<cword>") . "/gj **/*.*" . expand("%:e") <Bar> cw<CR>
+"nmap <leader>r :execute "vimgrep /" . expand("<cword>") . "/gj **/*.*" <Bar> cw<CR>
+"nmap <leader>r :execute "vimgrep /" . expand("<cword>") . " " . expand("%") <Bar> cw<CR>
+"nmap <leader>r :execute "vimgrep /<C-r><C-w>/%<CR>:ccl<CR>:cwin<CR><C-W>J:nohls<CR>"
+"nmap <leader>r :execute "vimgrep /<C-r><C-w>/%<CR>:ccl<CR>:cwin<CR><C-W>J:nohls<CR>"
+"nmap <silent> <leader>gw :vimgrep /<C-r><C-w>/ %<CR>:ccl<CR>:cwin<CR><C-W>J:nohls<CR>
+"command GREP :execute 'vimgrep '.expand('<cword>').' '.expand('%') | :copen | :cc
+"nnoremap <F2> :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+
+map ;e :w<CR>:exe ":!python " . getreg("%") . "" <CR>
+
+"
+"function! SurroundWithDoubleQuotes()
+    "let old_n = @n
+    "normal! gv
+    "normal! "nd
+    "let @n = "\"" . @n . "\""
+    "normal! "nP
+    "let @n = old_n
+"endfunction
+"imap ;; <C-R>:%!nl<CR>
